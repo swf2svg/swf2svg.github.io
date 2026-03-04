@@ -1,6 +1,9 @@
 # TODO
 - Custom styling for audio controls  
 - Make volume change possible while SVG animation and audio is playing  
+
+# BUGS
+- Animation doesn't play in Firefox ESR with JS disabled. Maybe possible with some more parameters?
   
 # Differences to the SWF and Adobe Flash Player 32,0,0,465
 The audio for limewire is actually slightly shorter  
