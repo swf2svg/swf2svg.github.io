@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>swf2svg</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background: #000;
     }
-
-    img {
-      max-width: 90vw;
-      max-height: 90vh;
+    object {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
-  <img src="limewire.svg" alt="Limewire">
+  <object type="image/svg+xml" data="limewire.svg"></object>
 </body>
 </html>
