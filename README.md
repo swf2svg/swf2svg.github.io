@@ -1,3 +1,7 @@
+# TODO
+- Custom styling for audio controls  
+- Make volume change possible while SVG animation and audio is playing  
+  
 # Differences to the SWF and Adobe Flash Player 32,0,0,465
 The audio for limewire is actually slightly shorter  
 Or at least flashplayer has a pause after the animation   
