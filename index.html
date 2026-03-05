@@ -35,28 +35,51 @@
       min-width: 0;
       min-height: 0;
       background: var(--bg);
+    }
+
+    .viewer-stack {
+      width: 100%;
+      height: 100%;
       position: relative;
     }
 
-    .viewer {
-      display: block;
+    .viewer-frame {
+      display: none;
       width: 100%;
       height: 100%;
       border: none;
       background: var(--bg);
-    }
-
-    #fallback {
       position: absolute;
       inset: 0;
+    }
+
+    .viewer-default {
+      display: block;
+    }
+
+    .viewer-frame:target {
+      display: block;
+    }
+
+    .viewer-frame:target ~ .viewer-default {
       display: none;
-      align-content: center;
+    }
+
+    .fallback {
+      color: #d2d2d2;
       text-align: center;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
       color: #d2d2d2;
       padding: 24px;
-      background: var(--bg);
-      line-height: 1.5;
-      pointer-events: none;
+      text-align: center;
     }
 
     aside {
@@ -98,7 +121,7 @@
     }
 
     .card {
-      appearance: none;
+      text-decoration: none;
       border: 1px solid var(--panel-line);
       background: #111;
       color: var(--text);
@@ -112,7 +135,7 @@
       gap: 6px;
       cursor: pointer;
       text-align: left;
-      transition: background 120ms ease, border-color 120ms ease;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
     }
 
     .card:hover {
@@ -125,11 +148,41 @@
       outline-offset: 1px;
     }
 
-    .card.active {
+    .card.default {
       background: var(--active-bg);
       color: var(--active-text);
       border-color: #fff;
       font-weight: 700;
+    }
+
+    @supports selector(body:has(*)) {
+      body:has(.viewer-frame:target) .card.default {
+        background: #111;
+        color: var(--text);
+        border-color: var(--panel-line);
+        font-weight: 400;
+      }
+
+      body:has(#view-greenie:target) .card[href="#view-greenie"] {
+        background: var(--active-bg);
+        color: var(--active-text);
+        border-color: #fff;
+        font-weight: 700;
+      }
+
+      body:has(#view-limewire:target) .card[href="#view-limewire"] {
+        background: var(--active-bg);
+        color: var(--active-text);
+        border-color: #fff;
+        font-weight: 700;
+      }
+
+      body:has(#view-reimu-rope-skip:target) .card[href="#view-reimu-rope-skip"] {
+        background: var(--active-bg);
+        color: var(--active-text);
+        border-color: #fff;
+        font-weight: 700;
+      }
     }
 
     .card-index {
@@ -162,92 +215,29 @@
 </head>
 <body>
   <main>
-    <object class="viewer" id="viewer" type="image/svg+xml" data="limewire.svg"></object>
-    <p id="fallback">
-      Your client doesn't support SVG even though it could without any danger.<br>
-      <strong>Raise your voice to get this changed.</strong>
-    </p>
+    <div class="viewer-stack">
+      <object id="view-greenie" class="viewer-frame" type="image/svg+xml" data="Greenie.svg">
+        <p class="fallback">Your client doesn't support SVG even though it could without any danger.<br><strong>Raise your voice to get this changed.</strong></p>
+      </object>
+      <object id="view-reimu-rope-skip" class="viewer-frame" type="image/svg+xml" data="Reimu_rope_skip.svg">
+        <p class="fallback">Your client doesn't support SVG even though it could without any danger.<br><strong>Raise your voice to get this changed.</strong></p>
+      </object>
+      <object id="view-limewire" class="viewer-frame viewer-default" type="image/svg+xml" data="limewire.svg">
+        <p class="fallback">Your client doesn't support SVG even though it could without any danger.<br><strong>Raise your voice to get this changed.</strong></p>
+      </object>
+    </div>
   </main>
 
   <aside>
     <div class="sidebar-header">
       <h2>Library</h2>
-      <span id="selection">0 items</span>
+      <span>3 items</span>
     </div>
-    <div class="list" id="svg-list"></div>
+    <div class="list">
+      <a class="card" href="#view-greenie" title="Greenie.svg" aria-label="Show Greenie"><span class="card-index">01</span><span class="card-title">Greenie</span></a>
+      <a class="card default" href="#view-limewire" title="limewire.svg" aria-label="Show limewire"><span class="card-index">02</span><span class="card-title">limewire</span></a>
+      <a class="card" href="#view-reimu-rope-skip" title="Reimu_rope_skip.svg" aria-label="Show Reimu rope skip"><span class="card-index">03</span><span class="card-title">Reimu rope skip</span></a>
+    </div>
   </aside>
-
-  <script>
-    const viewer = document.getElementById('viewer');
-    const fallback = document.getElementById('fallback');
-    const listEl = document.getElementById('svg-list');
-    const selectionEl = document.getElementById('selection');
-
-    const fallbackList = ['Greenie.svg', 'Reimu_rope_skip.svg', 'limewire.svg'];
-    const preferredDefault = 'limewire.svg';
-
-    function prettyName(filename) {
-      return filename.replace(/_/g, ' ').replace(/\.svg$/i, '');
-    }
-
-    function pickDefaultFile(list) {
-      const preferred = preferredDefault.toLowerCase();
-      return list.find((name) => name.toLowerCase() === preferred) || list[0];
-    }
-
-    function setActive(filename) {
-      viewer.data = filename;
-      selectionEl.textContent = `Selected: ${prettyName(filename)}`;
-
-      [...listEl.children].forEach((card) => {
-        card.classList.toggle('active', card.dataset.file === filename);
-      });
-    }
-
-    function createCard(filename, index) {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'card';
-      card.dataset.file = filename;
-      card.title = filename;
-      card.setAttribute('aria-label', `Show ${prettyName(filename)}`);
-
-      const order = document.createElement('span');
-      order.className = 'card-index';
-      order.textContent = String(index + 1).padStart(2, '0');
-
-      const title = document.createElement('span');
-      title.className = 'card-title';
-      title.textContent = prettyName(filename);
-
-      card.appendChild(order);
-      card.appendChild(title);
-      card.addEventListener('click', () => setActive(filename));
-      return card;
-    }
-
-    async function loadSvgList() {
-      try {
-        const res = await fetch('svgs.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error('svgs.json missing');
-        const list = await res.json();
-        if (!Array.isArray(list) || list.length === 0) throw new Error('empty list');
-        return list;
-      } catch {
-        return fallbackList;
-      }
-    }
-
-    loadSvgList().then((list) => {
-      listEl.innerHTML = '';
-      list.forEach((filename, idx) => listEl.appendChild(createCard(filename, idx)));
-      selectionEl.textContent = `${list.length} items`;
-      setActive(pickDefaultFile(list));
-    });
-
-    viewer.addEventListener('error', () => {
-      fallback.style.display = 'grid';
-    });
-  </script>
 </body>
 </html>
