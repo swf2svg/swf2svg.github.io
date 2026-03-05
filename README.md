@@ -1,6 +1,8 @@
 # TODO
 - Custom styling for audio controls  
 - Make volume change possible while SVG animation and audio is playing  
+- Try to make the SVGs use exactly the same amount of frames as SWFs  
+- FPS change?  
 
 # BUGS
 - Animation doesn't play in Firefox ESR with JS disabled. Maybe possible with some more parameters?
