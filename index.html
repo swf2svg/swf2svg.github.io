@@ -8,41 +8,245 @@
   <meta property="og:image" content="limewire.svg" />
   <meta property="og:image:type" content="image/svg+xml" />
   <style>
+    :root {
+      --bg: #000;
+      --panel-bg: #070707;
+      --panel-line: #4b4b4b;
+      --text: #fff;
+      --muted: #b8b8b8;
+      --active-bg: #fff;
+      --active-text: #000;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       width: 100vw;
       height: 100vh;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: sans-serif;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      display: grid;
+      grid-template-columns: 1fr 300px;
     }
-    object { width: 100%; height: 100%; }
+
+    main {
+      min-width: 0;
+      min-height: 0;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .viewer {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: var(--bg);
+    }
+
     #fallback {
+      position: absolute;
+      inset: 0;
       display: none;
-      color: #aaa;
+      align-content: center;
       text-align: center;
-      max-width: 400px;
-      line-height: 1.6;
-      font-size: 1rem;
+      color: #d2d2d2;
+      padding: 24px;
+      background: var(--bg);
+      line-height: 1.5;
+      pointer-events: none;
+    }
+
+    aside {
+      border-left: 2px solid #fff;
+      background: var(--panel-bg);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .sidebar-header {
+      border-bottom: 1px solid var(--panel-line);
+      padding: 10px 10px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-header h2 {
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .sidebar-header span {
+      color: var(--muted);
+      font-size: 0.74rem;
+      white-space: nowrap;
+    }
+
+    .list {
+      overflow: auto;
+      padding: 6px;
+      display: grid;
+      align-content: start;
+      gap: 4px;
+    }
+
+    .card {
+      appearance: none;
+      border: 1px solid var(--panel-line);
+      background: #111;
+      color: var(--text);
+      width: 100%;
+      min-height: 28px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+
+    .card:hover {
+      background: #1f1f1f;
+      border-color: #fff;
+    }
+
+    .card:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 1px;
+    }
+
+    .card.active {
+      background: var(--active-bg);
+      color: var(--active-text);
+      border-color: #fff;
+      font-weight: 700;
+    }
+
+    .card-index {
+      opacity: 0.75;
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .card-title {
+      font-size: 0.76rem;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 180px;
+      }
+
+      aside {
+        border-left: 0;
+        border-top: 2px solid #fff;
+      }
     }
   </style>
 </head>
 <body>
-  <object type="image/svg+xml" data="limewire.svg">
+  <main>
+    <object class="viewer" id="viewer" type="image/svg+xml" data="limewire.svg"></object>
     <p id="fallback">
-      Your client doesn't support SVG even tho it could without any danger.<br>
+      Your client doesn't support SVG even though it could without any danger.<br>
       <strong>Raise your voice to get this changed.</strong>
     </p>
-  </object>
+  </main>
+
+  <aside>
+    <div class="sidebar-header">
+      <h2>Library</h2>
+      <span id="selection">0 items</span>
+    </div>
+    <div class="list" id="svg-list"></div>
+  </aside>
 
   <script>
-    // object元素内のコンテンツは自動フォールバックだが、
-    // JS でも念のため SVG 読み込み失敗を検知して表示する
-    const obj = document.querySelector('object');
-    obj.addEventListener('error', () => {
-      document.getElementById('fallback').style.display = 'block';
+    const viewer = document.getElementById('viewer');
+    const fallback = document.getElementById('fallback');
+    const listEl = document.getElementById('svg-list');
+    const selectionEl = document.getElementById('selection');
+
+    const fallbackList = ['Greenie.svg', 'Reimu_rope_skip.svg', 'limewire.svg'];
+    const preferredDefault = 'limewire.svg';
+
+    function prettyName(filename) {
+      return filename.replace(/_/g, ' ').replace(/\.svg$/i, '');
+    }
+
+    function pickDefaultFile(list) {
+      const preferred = preferredDefault.toLowerCase();
+      return list.find((name) => name.toLowerCase() === preferred) || list[0];
+    }
+
+    function setActive(filename) {
+      viewer.data = filename;
+      selectionEl.textContent = `Selected: ${prettyName(filename)}`;
+
+      [...listEl.children].forEach((card) => {
+        card.classList.toggle('active', card.dataset.file === filename);
+      });
+    }
+
+    function createCard(filename, index) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card';
+      card.dataset.file = filename;
+      card.title = filename;
+      card.setAttribute('aria-label', `Show ${prettyName(filename)}`);
+
+      const order = document.createElement('span');
+      order.className = 'card-index';
+      order.textContent = String(index + 1).padStart(2, '0');
+
+      const title = document.createElement('span');
+      title.className = 'card-title';
+      title.textContent = prettyName(filename);
+
+      card.appendChild(order);
+      card.appendChild(title);
+      card.addEventListener('click', () => setActive(filename));
+      return card;
+    }
+
+    async function loadSvgList() {
+      try {
+        const res = await fetch('svgs.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('svgs.json missing');
+        const list = await res.json();
+        if (!Array.isArray(list) || list.length === 0) throw new Error('empty list');
+        return list;
+      } catch {
+        return fallbackList;
+      }
+    }
+
+    loadSvgList().then((list) => {
+      listEl.innerHTML = '';
+      list.forEach((filename, idx) => listEl.appendChild(createCard(filename, idx)));
+      selectionEl.textContent = `${list.length} items`;
+      setActive(pickDefaultFile(list));
+    });
+
+    viewer.addEventListener('error', () => {
+      fallback.style.display = 'grid';
     });
   </script>
 </body>
