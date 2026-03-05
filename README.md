@@ -1,5 +1,7 @@
 # TODO
 - Custom styling for audio controls  
+- Keep in mind audio controls might look fdifferent for various browsers  
+(check Chrome, Vivaldi, Firefox, Firefox ESR, Librewolf, Midori and Firefox for Android at least, also old versions)
 - Make volume change possible while SVG animation and audio is playing  
 - Try to make the SVGs use exactly the same amount of frames as SWFs  
 - FPS change?  
