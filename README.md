@@ -6,6 +6,8 @@
 - Try to make the SVGs use exactly the same amount of frames as SWFs  
 - FPS change?   
 - Figure out why SVG files don't embed in Matrix clients anymore (even when I send via Schildichat)  
+- Implement update timestamp (to help determining if an SVG supports newest browser features)
+- Add fallback controls (to at least start & stop only the animation via extra button for old browser)
 
 # BUGS
 - Animation doesn't play in Firefox ESR with JS disabled. Maybe possible with some more parameters?
