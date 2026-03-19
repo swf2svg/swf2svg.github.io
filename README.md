@@ -10,6 +10,7 @@
 - Add fallback controls (to at least start & stop only the animation via extra button for old browser)
 - Find out if animation can be reset to 0 via button in Firefox Nightly
 - When invoker commands for controlling playback (& fullscreen) via custom buttons land show "Limited animation state control" in orange
+- Add download links to versions without foreignObject (maybe generate them by using client-side JS from the displayed SVG to save storage?)
 
 # Differences to the SWF and Adobe Flash Player 32,0,0,465 
 In flashplayer limewire.swf has a pause after the animation   
