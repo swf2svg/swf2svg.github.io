@@ -11,9 +11,6 @@
 - Find out if animation can be reset to 0 via button in Firefox Nightly
 - When invoker commands for controlling playback (& fullscreen) via custom buttons land show "Limited animation state control" in orange
 
-# BUGS
-- Animation doesn't play in Firefox ESR with JS disabled. Maybe possible with some more parameters?
-  
 # Differences to the SWF and Adobe Flash Player 32,0,0,465 
 In flashplayer limewire.swf has a pause after the animation   
   
