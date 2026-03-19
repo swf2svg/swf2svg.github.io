@@ -54,6 +54,10 @@ function buildIdMap(files) {
   return idMap;
 }
 
+function redirectName(file) {
+  return `${file.replace(/\.svg$/i, '')}.html`;
+}
+
 function buildHtml(files) {
   const defaultFile =
     files.find((name) => name.toLowerCase() === PREFERRED_DEFAULT.toLowerCase()) || files[0] || '';
@@ -64,7 +68,8 @@ function buildHtml(files) {
       const id = idMap.get(file);
       const isDefault = file === defaultFile;
       const defaultClass = isDefault ? ' default' : '';
-      return `      <a class="card${defaultClass}" href="#${id}" title="${escapeHtml(file)}" aria-label="Show ${escapeHtml(prettyName(file))}"><span class="card-index">${String(index + 1).padStart(2, '0')}</span><span class="card-title">${escapeHtml(prettyName(file))}</span></a>`;
+      const redirectPage = redirectName(file);
+      return `      <a class="card${defaultClass}" href="${escapeHtml(redirectPage)}" data-target="#${id}" title="${escapeHtml(file)}" aria-label="Show ${escapeHtml(prettyName(file))}"><span class="card-index">${String(index + 1).padStart(2, '0')}</span><span class="card-title">${escapeHtml(prettyName(file))}</span></a>`;
     })
     .join('\n');
 
@@ -85,7 +90,7 @@ function buildHtml(files) {
   const activeRules = files
     .map((file) => {
       const id = idMap.get(file);
-      return `      body:has(#${id}:target) .card[href="#${id}"] {
+      return `      body:has(#${id}:target) .card[data-target="#${id}"] {
         background: var(--active-bg);
         color: var(--active-text);
         border-color: #fff;
@@ -313,11 +318,52 @@ ${cards}
 `;
 }
 
+function redirectHtml(target, title) {
+  const safeTitle = escapeHtml(title);
+  const safeTarget = escapeHtml(target);
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${safeTitle}</title>
+  <meta http-equiv="refresh" content="0; url=${safeTarget}">
+  <link rel="canonical" href="${safeTarget}">
+  <style>
+    body {
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      background: #000;
+      color: #fff;
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+    a { color: #fff; }
+  </style>
+</head>
+<body>
+  <p>Redirecting… If not, <a href="${safeTarget}">open the viewer</a>.</p>
+</body>
+</html>
+`;
+}
+
 const cwd = process.cwd();
 const svgFiles = collectSvgFiles(cwd);
 const html = buildHtml(svgFiles);
+const idMap = buildIdMap(svgFiles);
 
 writeFileSync(join(cwd, 'svgs.json'), JSON.stringify(svgFiles, null, 2));
 writeFileSync(join(cwd, 'index.html'), html);
+for (const file of svgFiles) {
+  const id = idMap.get(file);
+  const outName = redirectName(file);
+  const target = `index.html#${id}`;
+  const title = `${prettyName(file)} - swf2svg`;
+  writeFileSync(join(cwd, outName), redirectHtml(target, title));
+}
 
 console.log(`Wrote ${svgFiles.length} SVG names to svgs.json and index.html`);
+console.log(`Wrote ${svgFiles.length} redirect pages for SVG viewer entries`);
