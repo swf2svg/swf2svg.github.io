@@ -14,6 +14,7 @@
 
 # Differences to the SWF and Adobe Flash Player 32,0,0,465 
 In flashplayer limewire.swf has a pause after the animation   
+Caramelldansen_vectorised.svg looks sharper/better/has more clear outlines than the SWF, lol
   
 The thing is also that it doesn't look 100% the same anyway cause for  
 some reason the people start from a different posture than in flashplayer  
